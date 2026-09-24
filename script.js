@@ -10,7 +10,7 @@ const contactLinks = {
   instagram: "https://instagram.com/d_m3.d",
   tiktok: "https://www.tiktok.com/@iraq1_w"
 };
-\nconst menuButton = document.querySelector(".menu-btn");
+const menuButton = document.querySelector(".menu-btn");
 const navLinks = document.querySelector(".nav-links");
 
 menuButton?.addEventListener("click", () => {
