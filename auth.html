@@ -25,6 +25,18 @@
       <button class="auth-switch" type="button" id="resendConfirm">إعادة إرسال رابط تأكيد الإيميل</button>
       <div id="authMsg" class="form-msg" role="status" aria-live="polite"></div>
     </form>
+
+    <form id="recoveryForm" style="display:none">
+      <label>كلمة المرور الجديدة
+        <input id="newPassword" type="password" minlength="6" required placeholder="••••••••" autocomplete="new-password">
+      </label>
+      <label>تأكيد كلمة المرور
+        <input id="confirmPassword" type="password" minlength="6" required placeholder="••••••••" autocomplete="new-password">
+      </label>
+      <button class="btn btn-primary" type="submit">حفظ كلمة المرور</button>
+      <button class="auth-switch" type="button" id="backToLogin">رجوع لتسجيل الدخول</button>
+      <div id="recoveryMsg" class="form-msg" role="status" aria-live="polite"></div>
+    </form>
   </div>
 </main>
 
