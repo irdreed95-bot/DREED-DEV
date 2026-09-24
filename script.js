@@ -25,7 +25,7 @@ navLinks?.querySelectorAll("a").forEach(link => {
   });
 });
 
-document.getElementById("year").textContent = new Date().getFullYear();
+document.querySelectorAll(".year, #year").forEach(el => { el.textContent = new Date().getFullYear(); });
 
 document.getElementById("projectForm")?.addEventListener("submit", (event) => {
   event.preventDefault();
