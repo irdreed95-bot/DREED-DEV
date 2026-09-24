@@ -1,8 +1,12 @@
 const client=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 
 let signup=false;
+let recoveryReady=false;
+
 const form=document.querySelector("#authForm");
+const recoveryForm=document.querySelector("#recoveryForm");
 const msg=document.querySelector("#authMsg");
+const recoveryMsg=document.querySelector("#recoveryMsg");
 const name=document.querySelector("#fullName");
 const nameWrap=document.querySelector("#fullNameWrap");
 const title=document.querySelector("#authTitle");
@@ -10,14 +14,13 @@ const hint=document.querySelector("#authHint");
 const sw=document.querySelector("#switchAuth");
 const forgot=document.querySelector("#forgotPassword");
 const resend=document.querySelector("#resendConfirm");
+const backToLogin=document.querySelector("#backToLogin");
 
 const siteRoot=new URL("./",window.location.href).href;
 const redirectUrl=new URL("auth.html",siteRoot).href;
-const resetUrl=new URL("reset-password.html",siteRoot).href;
 
-function showMessage(text){
-  msg.textContent=text;
-}
+function showMessage(text){ msg.textContent=text; }
+function showRecoveryMessage(text){ recoveryMsg.textContent=text; }
 
 function mode(){
   nameWrap.style.display=signup?"grid":"none";
@@ -29,16 +32,53 @@ function mode(){
     ?"عندي حساب — تسجيل الدخول"
     :"ما عندي حساب — إنشاء حساب";
   forgot.style.display=signup?"none":"inline-flex";
-  resend.style.display=signup?"inline-flex":"inline-flex";
+  resend.style.display="inline-flex";
 }
 sw.onclick=()=>{signup=!signup;mode()};
 mode();
 
-async function handleRedirectSession(){
-  const hash=window.location.hash||"";
-  const isSignupConfirmation=hash.includes("type=signup");
-  const {data}=await client.auth.getSession();
+function showRecovery(){
+  form.style.display="none";
+  recoveryForm.style.display="grid";
+  title.textContent="تغيير كلمة المرور";
+  hint.textContent="اكتب كلمة المرور الجديدة لحسابك.";
+}
 
+function hideRecovery(){
+  recoveryForm.style.display="none";
+  form.style.display="grid";
+  title.textContent="دخول العميل";
+  hint.textContent="سجّل دخولك حتى تتابع طلباتك.";
+  window.history.replaceState({},document.title,window.location.pathname+window.location.search);
+  mode();
+}
+
+client.auth.onAuthStateChange((event,session)=>{
+  if(event==="PASSWORD_RECOVERY" && session){
+    recoveryReady=true;
+    showRecovery();
+    showRecoveryMessage("تم التحقق من الرابط. اكتب كلمة المرور الجديدة.");
+  }
+});
+
+async function handleInitialRoute(){
+  const hash=window.location.hash||"";
+  const isRecovery=hash.includes("type=recovery");
+  const isSignupConfirmation=hash.includes("type=signup");
+
+  if(isRecovery){
+    showRecovery();
+    const {data}=await client.auth.getSession();
+    if(data.session){
+      recoveryReady=true;
+      showRecoveryMessage("تم التحقق من الرابط. اكتب كلمة المرور الجديدة.");
+    }else{
+      showRecoveryMessage("جارٍ التحقق من رابط تغيير كلمة المرور…");
+    }
+    return;
+  }
+
+  const {data}=await client.auth.getSession();
   if(data.session){
     if(isSignupConfirmation){
       showMessage("تم تأكيد الإيميل وتفعيل حسابك بنجاح. جارٍ فتح حسابك…");
@@ -48,7 +88,7 @@ async function handleRedirectSession(){
     }
   }
 }
-handleRedirectSession();
+handleInitialRoute();
 
 form.onsubmit=async e=>{
   e.preventDefault();
@@ -100,7 +140,7 @@ forgot.onclick=async()=>{
 
   showMessage("جارٍ إرسال رابط تغيير كلمة المرور…");
   const r=await client.auth.resetPasswordForEmail(email,{
-    redirectTo:resetUrl
+    redirectTo:redirectUrl
   });
 
   if(r.error){
@@ -129,4 +169,44 @@ resend.onclick=async()=>{
   showMessage(r.error
     ?r.error.message
     :"إذا الحساب يحتاج تأكيد، راح توصلك رسالة جديدة. افتح أحدث رسالة فقط.");
+};
+
+backToLogin.onclick=async()=>{
+  await client.auth.signOut();
+  recoveryReady=false;
+  hideRecovery();
+};
+
+recoveryForm.onsubmit=async e=>{
+  e.preventDefault();
+
+  if(!recoveryReady){
+    showRecoveryMessage("انتظر لحظة حتى يتم التحقق من رابط تغيير كلمة المرور.");
+    return;
+  }
+
+  const password=document.querySelector("#newPassword").value;
+  const confirm=document.querySelector("#confirmPassword").value;
+
+  if(password.length<6){
+    showRecoveryMessage("كلمة المرور لازم تكون 6 أحرف أو أكثر.");
+    return;
+  }
+
+  if(password!==confirm){
+    showRecoveryMessage("كلمتا المرور غير متطابقتين.");
+    return;
+  }
+
+  showRecoveryMessage("جارٍ حفظ كلمة المرور…");
+  const {error}=await client.auth.updateUser({password});
+
+  if(error){
+    showRecoveryMessage(error.message);
+    return;
+  }
+
+  showRecoveryMessage("تم تغيير كلمة المرور بنجاح. جارٍ تحويلك لتسجيل الدخول…");
+  await client.auth.signOut();
+  setTimeout(()=>location.href="auth.html",900);
 };
