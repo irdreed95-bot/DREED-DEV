@@ -1,8 +1,16 @@
 const CONFIG = {
-  email: "YOUR_EMAIL@example.com",
+  email: "draeddraed75@gmail.com",
 };
 
-const menuButton = document.querySelector(".menu-btn");
+
+
+const contactLinks = {
+  phone: "tel:07828638203",
+  whatsapp: "https://wa.me/9647828638203",
+  instagram: "https://instagram.com/d_m3.d",
+  tiktok: "https://www.tiktok.com/@iraq1_w"
+};
+\nconst menuButton = document.querySelector(".menu-btn");
 const navLinks = document.querySelector(".nav-links");
 
 menuButton?.addEventListener("click", () => {
