@@ -1,0 +1,19 @@
+name: Keep Supabase Active
+
+on:
+  schedule:
+    - cron: "17 3,15 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate database activity
+        env:
+          SUPABASE_URL: https://pxjohgzdlubkkiuooxtx.supabase.co
+          SUPABASE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -e
+          curl --fail --silent --show-error             "$SUPABASE_URL/rest/v1/site_projects?select=id&limit=1"             -H "apikey: $SUPABASE_KEY"             -H "Authorization: Bearer $SUPABASE_KEY"             >/dev/null
+          echo "Supabase activity generated successfully."
