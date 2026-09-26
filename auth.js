@@ -97,7 +97,9 @@ form.onsubmit=async e=>{
   showMessage("جارٍ التنفيذ…");
 
   const email=normalizeEmail(document.querySelector("#email").value);
-  const password=document.querySelector("#password").value;\n  if(!validEmail(email)){showMessage("الإيميل غير صحيح. اكتب عنواناً مثل name@gmail.com");return;}\n  if(password.length<6){showMessage("كلمة المرور لازم تكون 6 أحرف أو أكثر.");return;}
+  const password=document.querySelector("#password").value;
+  if(!validEmail(email)){showMessage("الإيميل غير صحيح. اكتب عنواناً مثل name@gmail.com");return;}
+  if(password.length<6){showMessage("كلمة المرور لازم تكون 6 أحرف أو أكثر.");return;}
 
   const r=signup
     ?await client.auth.signUp({
@@ -112,7 +114,9 @@ form.onsubmit=async e=>{
 
   if(r.error){
     const text=r.error.message||"تعذر تنفيذ العملية.";
-    if(/invalid email|email address.*invalid|unable to validate email/i.test(text)){\n      showMessage("الإيميل غير صالح أو مكتوب بشكل غير صحيح. جرّب Gmail/Outlook صحيحاً مثل name@gmail.com.");\n    }else if(!signup && /invalid login credentials/i.test(text)){
+    if(/invalid email|email address.*invalid|unable to validate email/i.test(text)){
+      showMessage("الإيميل غير صالح أو مكتوب بشكل غير صحيح. جرّب Gmail/Outlook صحيحاً مثل name@gmail.com.");
+    }else if(!signup && /invalid login credentials/i.test(text)){
       showMessage("بيانات الدخول غير صحيحة. إذا نسيت كلمة المرور اضغط «نسيت كلمة المرور؟».");
     }else{
       showMessage(text);
