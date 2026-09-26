@@ -18,6 +18,8 @@ const backToLogin=document.querySelector("#backToLogin");
 
 const siteRoot=new URL("./",window.location.href).href;
 const redirectUrl=new URL("auth.html",siteRoot).href;
+const normalizeEmail=value=>value.trim().toLowerCase();
+const validEmail=value=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
 
 function showMessage(text){ msg.textContent=text; }
 function showRecoveryMessage(text){ recoveryMsg.textContent=text; }
@@ -94,8 +96,8 @@ form.onsubmit=async e=>{
   e.preventDefault();
   showMessage("جارٍ التنفيذ…");
 
-  const email=document.querySelector("#email").value.trim();
-  const password=document.querySelector("#password").value;
+  const email=normalizeEmail(document.querySelector("#email").value);
+  const password=document.querySelector("#password").value;\n  if(!validEmail(email)){showMessage("الإيميل غير صحيح. اكتب عنواناً مثل name@gmail.com");return;}\n  if(password.length<6){showMessage("كلمة المرور لازم تكون 6 أحرف أو أكثر.");return;}
 
   const r=signup
     ?await client.auth.signUp({
@@ -110,7 +112,7 @@ form.onsubmit=async e=>{
 
   if(r.error){
     const text=r.error.message||"تعذر تنفيذ العملية.";
-    if(!signup && /invalid login credentials/i.test(text)){
+    if(/invalid email|email address.*invalid|unable to validate email/i.test(text)){\n      showMessage("الإيميل غير صالح أو مكتوب بشكل غير صحيح. جرّب Gmail/Outlook صحيحاً مثل name@gmail.com.");\n    }else if(!signup && /invalid login credentials/i.test(text)){
       showMessage("بيانات الدخول غير صحيحة. إذا نسيت كلمة المرور اضغط «نسيت كلمة المرور؟».");
     }else{
       showMessage(text);
@@ -131,7 +133,7 @@ form.onsubmit=async e=>{
 };
 
 forgot.onclick=async()=>{
-  const email=document.querySelector("#email").value.trim();
+  const email=normalizeEmail(document.querySelector("#email").value);
   if(!email){
     showMessage("اكتب إيميلك أولاً، وبعدها اضغط «نسيت كلمة المرور؟».");
     document.querySelector("#email").focus();
