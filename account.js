@@ -9,7 +9,7 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
  ? '<span class="owner-badge">♛ المالك</span><span class="owner-user">@'+esc(profile.username||"owner")+'</span><span class="owner-name">'+esc(profile.full_name||"")+'</span>'
  : 'مرحباً '+esc(profile.full_name||user.email||"");
  const adminLink=document.querySelector("#adminLink"); if(profile.is_admin)adminLink.style.display="inline-flex";
- const r=await client.from("project_requests").select("*").order("created_at",{ascending:false});
+ const r=await client.from("project_requests").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
  const box=document.querySelector("#requests");
  if(r.error){box.innerHTML="<div class='empty-note'>تعذر تحميل الطلبات.</div>";return}
  if(!r.data.length){box.innerHTML="<div class='empty-note'><span>+</span><div><strong>ما عندك طلبات بعد.</strong><br>ابدأ أول مشروع من صفحة طلب مشروع.</div><a href='contact.html'>اطلب مشروع →</a></div>";return}
